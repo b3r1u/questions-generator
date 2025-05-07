@@ -37,8 +37,8 @@ Gere ${count} questões de múltipla escolha de nível ${
         ? "médio"
         : "difícil"
     }, baseadas no texto abaixo.
-Cada questão deve ter 4 alternativas, apenas uma correta.
-Retorne SOMENTE um array JSON sem explicações ou comentários, como no exemplo abaixo:
+Cada questão deve ter 4 alternativas, apenas uma correta, todas em Portugês(Br).
+Retorne SOMENTE um array JSON sem explicações ou comentários e procure alternar entre as opções corretas, não mantendo apenas na mesma letra, como no exemplo abaixo:
 [
   {
     "type": "multiple_choice",
@@ -62,12 +62,24 @@ Texto base:
     try {
       questions = JSON.parse(aiResponse);
     } catch (e) {
-      const jsonMatch = aiResponse.match(/\[.*\]/s);
+      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        questions = JSON.parse(jsonMatch[0]);
+        let cleaned = jsonMatch[0].replace(/,\s*([\]}])/g, "$1");
+        cleaned = fixCorruptedOptionsArray(cleaned);
+        try {
+          questions = JSON.parse(cleaned);
+        } catch (err3) {
+          console.error("JSON após tentativa de limpeza:", cleaned);
+          return res.status(500).json({
+            error:
+              "Não foi possível extrair as questões da resposta da IA (JSON malformado).",
+            raw: aiResponse,
+          });
+        }
       } else {
         return res.status(500).json({
           error: "Não foi possível extrair as questões da resposta da IA.",
+          raw: aiResponse,
         });
       }
     }
@@ -335,6 +347,19 @@ function createXlsxBuffer(questions, title, showAnswers) {
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   XLSX.utils.book_append_sheet(wb, ws, "Questionário");
   return XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+}
+
+function fixCorruptedOptionsArray(jsonString) {
+  return jsonString.replace(
+    /("options"\s*:\s*\[)([^\]]*)\]/g,
+    (match, start, inner) => {
+      const cleaned = inner
+        .replace(/"correctAnswer"\s*:\s*\d+,?/g, "")
+        .replace(/"difficulty"\s*:\s*"[^"]*",?/g, "");
+      const cleaned2 = cleaned.replace(/,\s*$/, "");
+      return `${start}${cleaned2}]`;
+    }
+  );
 }
 
 module.exports = router;
