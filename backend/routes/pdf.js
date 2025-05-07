@@ -4,6 +4,7 @@ const pdfParse = require("pdf-parse");
 const PDFDocument = require("pdfkit");
 const docx = require("docx");
 const XLSX = require("xlsx");
+const { buildPrompt } = require("./prompt");
 const { Document, Packer, Paragraph, TextRun } = docx;
 require("dotenv").config();
 
@@ -29,28 +30,7 @@ router.post("/extract-questions", upload.single("pdf"), async (req, res) => {
     const pdfData = await pdfParse(req.file.buffer);
     const text = pdfData.text;
 
-    const prompt = `
-Gere ${count} questões de múltipla escolha de nível ${
-      difficulty === "easy"
-        ? "fácil"
-        : difficulty === "medium"
-        ? "médio"
-        : "difícil"
-    }, baseadas no texto abaixo.
-Cada questão deve ter 4 alternativas, apenas uma correta, todas em Portugês(Br).
-Retorne SOMENTE um array JSON sem explicações ou comentários e procure alternar entre as opções corretas, não mantendo apenas na mesma letra, como no exemplo abaixo:
-[
-  {
-    "type": "multiple_choice",
-    "text": "Enunciado da questão...",
-    "options": ["A", "B", "C", "D"],
-    "correctAnswer": 0,
-    "difficulty": "${difficulty}"
-  }
-]
-Texto base:
-"""${text.substring(0, 6000)}"""
-`;
+    const prompt = buildPrompt(count, difficulty, text);
 
     const completion = await openai.chat.completions.create({
       model: "llama3-70b-8192",
@@ -66,6 +46,7 @@ Texto base:
       if (jsonMatch) {
         let cleaned = jsonMatch[0].replace(/,\s*([\]}])/g, "$1");
         cleaned = fixCorruptedOptionsArray(cleaned);
+        cleaned = fixBrokenOptionStrings(cleaned);
         try {
           questions = JSON.parse(cleaned);
         } catch (err3) {
@@ -358,6 +339,19 @@ function fixCorruptedOptionsArray(jsonString) {
         .replace(/"difficulty"\s*:\s*"[^"]*",?/g, "");
       const cleaned2 = cleaned.replace(/,\s*$/, "");
       return `${start}${cleaned2}]`;
+    }
+  );
+}
+
+function fixBrokenOptionStrings(jsonString) {
+  return jsonString.replace(
+    /("options"\s*:\s*\[([^\]]*?))((?:[^\"])\])/g,
+    (match, start, inner, end) => {
+      const fixedInner = inner.replace(
+        /,?\s*([^\"]+)\s*\]$/,
+        (m, p1) => `,"${p1.trim()}"]`
+      );
+      return start + fixedInner + end;
     }
   );
 }
