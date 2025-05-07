@@ -1,0 +1,105 @@
+<div class="upload-container">
+  <h2>Criar Questionário a partir de PDF</h2>
+
+  <div class="file-upload-section">
+    <div class="file-input-wrapper">
+      <input
+        type="file"
+        id="pdfInput"
+        accept=".pdf"
+        (change)="onFileSelected($event)"
+        #fileInput
+      />
+      <label for="pdfInput" class="file-input-label">
+        {{ selectedFile ? selectedFile.name : "Selecionar PDF" }}
+      </label>
+    </div>
+
+    <div class="generation-options">
+      <div class="form-group">
+        <label for="difficulty">Dificuldade:</label>
+        <select id="difficulty" [(ngModel)]="generationOptions.difficulty">
+          <option value="easy">Fácil</option>
+          <option value="medium">Médio</option>
+          <option value="hard">Difícil</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="questionCount">Número de Questões:</label>
+        <input
+          type="number"
+          id="questionCount"
+          [(ngModel)]="generationOptions.count"
+          min="1"
+          max="20"
+        />
+      </div>
+    </div>
+
+    <button
+      class="generate-btn"
+      (click)="extractQuestions()"
+      [disabled]="!selectedFile || isLoading"
+    >
+      {{ isLoading ? "Processando..." : "Gerar Questões" }}
+    </button>
+    <div *ngIf="pdfText">
+      <h3>Texto extraído do PDF:</h3>
+      <pre style="max-height: 200px; overflow: auto; background: #f7f7f7">{{
+        pdfText
+      }}</pre>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="questions.length > 0" class="questions-section">
+    <div class="download-options" *ngIf="showDownloadOptions">
+      <h3>Opções de Download</h3>
+      <div class="form-group">
+        <label for="quizTitle">Título do Questionário:</label>
+        <input
+          type="text"
+          id="quizTitle"
+          [(ngModel)]="questionnaireTitle"
+          placeholder="Digite o título"
+        />
+      </div>
+      <button class="download-btn" (click)="downloadPdf()">
+        Baixar Questionário em PDF
+      </button>
+    </div>
+
+    <h3>Questões Geradas ({{ questions.length }})</h3>
+
+    <div class="questions-list">
+      <div
+        *ngFor="let question of questions; let i = index; trackBy: trackByFn"
+        class="question-card"
+      >
+        <div class="question-header">
+          <h4>
+            Questão {{ i + 1 }}
+            <span class="difficulty-badge">{{ question.difficulty }}</span>
+          </h4>
+          <button class="remove-btn" (click)="removeQuestion(i)">×</button>
+        </div>
+        <p class="question-text">{{ question.text }}</p>
+
+        <div *ngIf="question.options?.length" class="options-list">
+          <div
+            *ngFor="let option of question.options; let j = index"
+            class="option"
+            [class.correct]="j === question.correctAnswer"
+          >
+            <span class="option-letter">{{ getOptionLetter(j) }})</span>
+            {{ option }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
