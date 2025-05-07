@@ -14,6 +14,7 @@ export class PdfUploadComponent {
   error = '';
   showDownloadOptions = false;
   pdfText: string = '';
+  selectedFormat = 'pdf' as 'pdf' | 'docx' | 'xlsx';
 
   generationOptions = {
     difficulty: 'medium' as 'easy' | 'medium' | 'hard',
@@ -94,5 +95,14 @@ export class PdfUploadComponent {
         console.error(err);
       },
     });
+  }
+
+  downloadQuizAndAnswerKey() {
+    if (this.questions.length === 0) return;
+    this.pdfService.downloadQuizAndAnswerKey(
+      this.questions,
+      this.questionnaireTitle,
+      this.selectedFormat
+    );
   }
 }

@@ -68,8 +68,16 @@
           placeholder="Digite o título"
         />
       </div>
-      <button class="download-btn" (click)="downloadPdf()">
-        Baixar Questionário em PDF
+      <div class="form-group">
+        <label for="fileFormat">Formato do Arquivo:</label>
+        <select id="fileFormat" [(ngModel)]="selectedFormat">
+          <option value="pdf">PDF</option>
+          <option value="docx">Word (.docx)</option>
+          <option value="xlsx">Excel (.xlsx)</option>
+        </select>
+      </div>
+      <button class="download-btn" (click)="downloadQuizAndAnswerKey()">
+        Baixar Questões e Gabarito
       </button>
     </div>
 

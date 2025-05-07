@@ -51,4 +51,60 @@ export class PdfService {
       formData
     );
   }
+
+  downloadQuizAndAnswerKey(
+    questions: Question[],
+    title: string,
+    format: 'pdf' | 'docx' | 'xlsx'
+  ): void {
+    this.generateQuizAndAnswerKey(questions, title, format).subscribe(
+      (response: any) => {
+        const quizBlob = this.base64ToBlob(
+          response.quiz,
+          this.getMimeType(format)
+        );
+        const answerKeyBlob = this.base64ToBlob(
+          response.answerKey,
+          this.getMimeType(format)
+        );
+        saveAs(quizBlob, `${title}.${format}`);
+        saveAs(answerKeyBlob, `${title}_Gabarito.${format}`);
+      }
+    );
+  }
+
+  base64ToBlob(base64: string, mime: string): Blob {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mime });
+  }
+
+  generateQuizAndAnswerKey(
+    questions: Question[],
+    title: string,
+    format: string
+  ): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/generate-quiz-and-answer-key`,
+      { questions, title, format },
+      { responseType: 'json' }
+    );
+  }
+
+  getMimeType(format: string): string {
+    switch (format) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      default:
+        return 'application/octet-stream';
+    }
+  }
 }
