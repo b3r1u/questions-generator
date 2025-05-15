@@ -1,4 +1,5 @@
-<div class="modal-content">
+<div class="modal-overlay">
+  <div class="modal-content">
     <div class="modal-header">
       <h3>Editar Questão</h3>
       <button class="close-btn" (click)="onCancel()">&times;</button>
@@ -12,17 +13,26 @@
           class="question-textarea"
         ></textarea>
       </div>
-  
+
       <div class="form-group">
         <label>Alternativas:</label>
-        <div *ngFor="let option of editedQuestion.options; let i = index" class="option-edit">
+        <div
+          *ngFor="
+            let option of editedQuestion.options;
+            let i = index;
+            trackBy: trackByIndex
+          "
+          class="option-edit"
+        >
           <div class="option-row">
             <span class="option-letter">{{ getOptionLetter(i) }})</span>
             <input
               type="text"
-              [(ngModel)]="editedQuestion.options[i]"
+              [ngModel]="editedQuestion.options[i]"
+              (ngModelChange)="updateOption($event, i)"
               class="option-input"
             />
+
             <button
               class="correct-btn"
               [class.selected]="i === editedQuestion.correctAnswer"
@@ -39,3 +49,4 @@
       <button class="save-btn" (click)="onSave()">Salvar</button>
     </div>
   </div>
+</div>

@@ -33,4 +33,12 @@ export class EditQuestionModalComponent {
   onCancel(): void {
     this.dialogRef.close();
   }
+
+  updateOption(value: string, index: number): void {
+    this.editedQuestion.options[index] = value;
+  }
+
+  trackByIndex(index: number, item: any): number {
+    return index;
+  }
 }
