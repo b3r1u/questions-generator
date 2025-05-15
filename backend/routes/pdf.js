@@ -19,6 +19,57 @@ const openai = new OpenAI({
   baseURL: "https://api.groq.com/openai/v1",
 });
 
+async function generateQuestionsWithRetry({ prompt, maxAttempts = 3 }) {
+  const disallowedWords = [
+    "correctanswer",
+    "difficulty",
+    "type",
+    "text",
+    "options",
+  ];
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "llama3-70b-8192",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+      });
+
+      let aiResponse = completion.choices[0].message.content;
+
+      try {
+        let questions = JSON.parse(aiResponse);
+        return sanitizeOptions(questions, disallowedWords);
+      } catch (e) {
+        const repaired = jsonrepair(aiResponse);
+        let questions = JSON.parse(repaired);
+        return sanitizeOptions(questions, disallowedWords);
+      }
+    } catch (error) {
+      console.warn(`⚠️ Tentativa ${attempt} falhou: ${error.message}`);
+      if (attempt === maxAttempts) throw error;
+    }
+  }
+
+  throw new Error("Falha ao gerar questões após várias tentativas.");
+}
+
+function sanitizeOptions(questions, disallowedWords) {
+  return questions.map((q) => {
+    const filteredOptions = q.options.filter(
+      (opt) =>
+        typeof opt === "string" &&
+        !disallowedWords.includes(opt.trim().toLowerCase())
+    );
+
+    return {
+      ...q,
+      options: filteredOptions.length === 4 ? filteredOptions : q.options,
+    };
+  });
+}
+
 router.post("/extract-questions", upload.single("pdf"), async (req, res) => {
   try {
     const count = parseInt(req.body.count, 10);
@@ -33,39 +84,17 @@ router.post("/extract-questions", upload.single("pdf"), async (req, res) => {
 
     const pdfData = await pdfParse(req.file.buffer);
     const text = pdfData.text;
-
     const prompt = buildPrompt(count, difficulty, text);
 
-    const completion = await openai.chat.completions.create({
-      model: "llama3-70b-8192",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.6,
-    });
-
-    let aiResponse = completion.choices[0].message.content;
-    let questions;
-
-    try {
-      questions = JSON.parse(aiResponse);
-    } catch (e) {
-      try {
-        const repaired = jsonrepair(aiResponse);
-        questions = JSON.parse(repaired);
-      } catch (err) {
-        console.error("Erro ao reparar o JSON:", err);
-        return res.status(500).json({
-          error: "Não foi possível extrair as questões da resposta da IA.",
-          raw: aiResponse,
-        });
-      }
-    }
+    const questions = await generateQuestionsWithRetry({ prompt });
 
     res.json({ questions });
   } catch (error) {
     console.error("Erro ao gerar questões:", error);
-    res
-      .status(500)
-      .json({ error: "Erro ao gerar questões.", details: error.message });
+    res.status(500).json({
+      error: "Erro ao gerar questões.",
+      details: error.message,
+    });
   }
 });
 
