@@ -10,9 +10,15 @@ import { EditQuestionModalComponent } from './shared/components/edit-question-mo
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { NumberToArrayPipe } from 'src/pipes/numberToArray';
 
 @NgModule({
-  declarations: [AppComponent, PdfUploadComponent, EditQuestionModalComponent],
+  declarations: [
+    AppComponent,
+    PdfUploadComponent,
+    EditQuestionModalComponent,
+    NumberToArrayPipe,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -21,7 +27,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     BrowserAnimationsModule,
     MatDialogModule,
     FormsModule,
-    DragDropModule
+    DragDropModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

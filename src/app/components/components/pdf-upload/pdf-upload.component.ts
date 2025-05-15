@@ -135,16 +135,13 @@ export class PdfUploadComponent {
   }
 
   getStarCount(difficulty: string): number {
-    switch (difficulty.toLowerCase()) {
-      case 'fácil':
+    switch (difficulty) {
       case 'easy':
-        return 2;
-      case 'médio':
+        return 1;
       case 'medium':
-        return 3;
-      case 'difícil':
+        return 2;
       case 'hard':
-        return 5;
+        return 3;
       default:
         return 0;
     }
