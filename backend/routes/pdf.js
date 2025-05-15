@@ -6,6 +6,8 @@ const docx = require("docx");
 const XLSX = require("xlsx");
 const { buildPrompt } = require("./prompt");
 const { Document, Packer, Paragraph, TextRun } = docx;
+const { jsonrepair } = require("jsonrepair");
+
 require("dotenv").config();
 
 const router = express.Router();
@@ -19,12 +21,14 @@ const openai = new OpenAI({
 
 router.post("/extract-questions", upload.single("pdf"), async (req, res) => {
   try {
-    const { difficulty, count } = req.body;
+    const count = parseInt(req.body.count, 10);
+    const difficulty = req.body.difficulty?.trim().toLowerCase();
+
     if (!req.file) {
       return res.status(400).json({ error: "Nenhum arquivo enviado." });
     }
-    if (!difficulty || !count) {
-      return res.status(400).json({ error: "Dados incompletos." });
+    if (!difficulty || isNaN(count) || count <= 0) {
+      return res.status(400).json({ error: "Dados inválidos." });
     }
 
     const pdfData = await pdfParse(req.file.buffer);
@@ -37,27 +41,18 @@ router.post("/extract-questions", upload.single("pdf"), async (req, res) => {
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
     });
+
     let aiResponse = completion.choices[0].message.content;
     let questions;
+
     try {
       questions = JSON.parse(aiResponse);
     } catch (e) {
-      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        let cleaned = jsonMatch[0].replace(/,\s*([\]}])/g, "$1");
-        cleaned = fixCorruptedOptionsArray(cleaned);
-        cleaned = fixBrokenOptionStrings(cleaned);
-        try {
-          questions = JSON.parse(cleaned);
-        } catch (err3) {
-          console.error("JSON após tentativa de limpeza:", cleaned);
-          return res.status(500).json({
-            error:
-              "Não foi possível extrair as questões da resposta da IA (JSON malformado).",
-            raw: aiResponse,
-          });
-        }
-      } else {
+      try {
+        const repaired = jsonrepair(aiResponse);
+        questions = JSON.parse(repaired);
+      } catch (err) {
+        console.error("Erro ao reparar o JSON:", err);
         return res.status(500).json({
           error: "Não foi possível extrair as questões da resposta da IA.",
           raw: aiResponse,
@@ -68,7 +63,9 @@ router.post("/extract-questions", upload.single("pdf"), async (req, res) => {
     res.json({ questions });
   } catch (error) {
     console.error("Erro ao gerar questões:", error);
-    res.status(500).json({ error: "Erro ao gerar questões." });
+    res
+      .status(500)
+      .json({ error: "Erro ao gerar questões.", details: error.message });
   }
 });
 
