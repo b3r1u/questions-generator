@@ -356,30 +356,5 @@ function createXlsxBuffer(questions, title, showAnswers) {
   return XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 }
 
-function fixCorruptedOptionsArray(jsonString) {
-  return jsonString.replace(
-    /("options"\s*:\s*\[)([^\]]*)\]/g,
-    (match, start, inner) => {
-      const cleaned = inner
-        .replace(/"correctAnswer"\s*:\s*\d+,?/g, "")
-        .replace(/"difficulty"\s*:\s*"[^"]*",?/g, "");
-      const cleaned2 = cleaned.replace(/,\s*$/, "");
-      return `${start}${cleaned2}]`;
-    }
-  );
-}
-
-function fixBrokenOptionStrings(jsonString) {
-  return jsonString.replace(
-    /("options"\s*:\s*\[([^\]]*?))((?:[^\"])\])/g,
-    (match, start, inner, end) => {
-      const fixedInner = inner.replace(
-        /,?\s*([^\"]+)\s*\]$/,
-        (m, p1) => `,"${p1.trim()}"]`
-      );
-      return start + fixedInner + end;
-    }
-  );
-}
 
 module.exports = router;
