@@ -4,7 +4,7 @@ export interface Question {
   id?: string;
   type: QuestionType;
   text: string;
-  options?: string[];
+  options: string[];
   correctAnswer?: number | string;
   difficulty?: 'easy' | 'medium' | 'hard';
   category?: string;

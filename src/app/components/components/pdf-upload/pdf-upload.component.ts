@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { PdfService } from 'src/app/services/pdf.service';
 import { Question } from 'src/app/models/question.model';
+import { ModalService } from 'src/app/services/modal.service';
 
 @Component({
   selector: 'app-pdf-upload',
@@ -23,7 +24,24 @@ export class PdfUploadComponent {
 
   questionnaireTitle = 'Questionário Gerado';
 
-  constructor(private pdfService: PdfService) {}
+  constructor(
+    private pdfService: PdfService,
+    private modalService: ModalService
+  ) {}
+
+  async editQuestion(question: Question, index: number): Promise<void> {
+    try {
+      const editedQuestion = await this.modalService.openEditQuestionModal(
+        question
+      );
+
+      if (editedQuestion) {
+        this.questions[index] = editedQuestion;
+      }
+    } catch (error) {
+      console.error('Erro ao editar questão:', error);
+    }
+  }
 
   onFileSelected(event: any): void {
     this.selectedFile = event.target.files[0];
