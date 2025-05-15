@@ -81,6 +81,10 @@
       </button>
     </div>
 
+    <button class="toggle-all-btn" (click)="toggleAllAnswers()">
+      {{ showAllAnswers ? "Ocultar Gabarito Geral" : "Mostrar Gabarito Geral" }}
+    </button>
+
     <h3>Questões Geradas ({{ questions.length }})</h3>
 
     <div cdkDropList class="questions-list" (cdkDropListDropped)="drop($event)">

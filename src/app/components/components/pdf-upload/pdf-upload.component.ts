@@ -18,6 +18,7 @@ export class PdfUploadComponent {
   pdfText: string = '';
   selectedFormat = 'pdf' as 'pdf' | 'docx' | 'xlsx';
   showCorrectAnswers: boolean[] = [];
+  showAllAnswers = false;
 
   generationOptions = {
     difficulty: 'medium' as 'easy' | 'medium' | 'hard',
@@ -87,6 +88,11 @@ export class PdfUploadComponent {
 
   toggleCorrectAnswer(index: number): void {
     this.showCorrectAnswers[index] = !this.showCorrectAnswers[index];
+  }
+
+  toggleAllAnswers(): void {
+    this.showAllAnswers = !this.showAllAnswers;
+    this.showCorrectAnswers = this.questions.map(() => this.showAllAnswers);
   }
 
   isCorrectOption(index: number, optionIndex: number): boolean {
