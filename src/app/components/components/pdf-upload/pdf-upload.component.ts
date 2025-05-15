@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { PdfService } from 'src/app/services/pdf.service';
 import { Question } from 'src/app/models/question.model';
 import { ModalService } from 'src/app/services/modal.service';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-pdf-upload',
@@ -32,7 +33,8 @@ export class PdfUploadComponent {
   async editQuestion(question: Question, index: number): Promise<void> {
     try {
       const editedQuestion = await this.modalService.openEditQuestionModal(
-        question
+        question,
+        index
       );
 
       if (editedQuestion) {
@@ -41,6 +43,10 @@ export class PdfUploadComponent {
     } catch (error) {
       console.error('Erro ao editar questão:', error);
     }
+  }
+
+  drop(event: CdkDragDrop<Question[]>) {
+    moveItemInArray(this.questions, event.previousIndex, event.currentIndex);
   }
 
   onFileSelected(event: any): void {
@@ -126,5 +132,21 @@ export class PdfUploadComponent {
 
   limparLetra(text: string): string {
     return text.replace(/^[a-zA-Z0-9][\)\.]\s*/g, '').trim();
+  }
+
+  getStarCount(difficulty: string): number {
+    switch (difficulty.toLowerCase()) {
+      case 'fácil':
+      case 'easy':
+        return 2;
+      case 'médio':
+      case 'medium':
+        return 3;
+      case 'difícil':
+      case 'hard':
+        return 5;
+      default:
+        return 0;
+    }
   }
 }

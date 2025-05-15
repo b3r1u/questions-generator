@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { EditQuestionModalComponent } from './shared/components/edit-question-modal/edit-question-modal.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [AppComponent, PdfUploadComponent, EditQuestionModalComponent],
@@ -20,6 +21,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     BrowserAnimationsModule,
     MatDialogModule,
     FormsModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent],

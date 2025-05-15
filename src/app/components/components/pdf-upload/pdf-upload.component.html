@@ -83,15 +83,27 @@
 
     <h3>Questões Geradas ({{ questions.length }})</h3>
 
-    <div class="questions-list">
+    <div cdkDropList class="questions-list" (cdkDropListDropped)="drop($event)">
       <div
         *ngFor="let question of questions; let i = index; trackBy: trackByFn"
+        cdkDrag
         class="question-card"
       >
         <div class="question-header">
           <h4>
             Questão {{ i + 1 }}
-            <span class="difficulty-badge">{{ question.difficulty }}</span>
+            <span class="difficulty-stars">
+              <img
+                *ngFor="
+                  let star of [].constructor(
+                    getStarCount(question.difficulty || '')
+                  )
+                "
+                src="assets/icons/star.png"
+                class="star-icon"
+                alt="★"
+              />
+            </span>
           </h4>
           <button class="edit-btn" (click)="editQuestion(question, i)">
             <i class="edit-icon">✏️</i>
@@ -113,4 +125,3 @@
     </div>
   </div>
 </div>
-

@@ -9,13 +9,15 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class EditQuestionModalComponent {
   editedQuestion: Question;
+  questionNumber: number;
 
   constructor(
     public dialogRef: MatDialogRef<EditQuestionModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { question: Question }
+    @Inject(MAT_DIALOG_DATA) public data: { question: Question; index: number }
   ) {
     this.editedQuestion = JSON.parse(JSON.stringify(data.question));
     this.editedQuestion.options = this.editedQuestion.options || [];
+    this.questionNumber = data.index + 1;
   }
 
   getOptionLetter(index: number): string {

@@ -11,11 +11,12 @@ export class ModalService {
   constructor(private dialog: MatDialog) {}
 
   async openEditQuestionModal(
-    question: Question
+    question: Question,
+    index: number
   ): Promise<Question | undefined> {
     const dialogRef = this.dialog.open(EditQuestionModalComponent, {
       width: '600px',
-      data: { question },
+      data: { question, index },
     });
 
     return await firstValueFrom(dialogRef.afterClosed());

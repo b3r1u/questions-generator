@@ -198,3 +198,34 @@ input[type="file"] {
     color: #842029;
   }
 }
+
+.difficulty-stars {
+  display: inline-block;
+  margin-left: 8px;
+
+  .star-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+}
+
+.questions-list {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.question-card.cdk-drag-preview {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+.question-card.cdk-drag-placeholder {
+  background: #e0e0e0;
+  border: dashed 2px #aaa;
+  min-height: 60px;
+}
+
