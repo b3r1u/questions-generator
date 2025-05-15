@@ -103,17 +103,33 @@
               </ng-container>
             </span>
           </h4>
-          <button class="edit-btn" (click)="editQuestion(question, i)">
-            <img src="assets/icons/edit.png" alt="Editar" class="edit-icon" />
-          </button>
+
+          <div class="actions">
+            <button class="icon-btn" (click)="editQuestion(question, i)">
+              <img src="assets/icons/edit.png" alt="Editar" class="edit-icon" />
+            </button>
+
+            <button class="icon-btn" (click)="toggleCorrectAnswer(i)">
+              <img
+                [src]="
+                  showCorrectAnswers[i]
+                    ? 'assets/icons/hide.png'
+                    : 'assets/icons/view.png'
+                "
+                alt="Ver resposta"
+                class="toggle-icon"
+              />
+            </button>
+          </div>
         </div>
+
         <p class="question-text">{{ question.text }}</p>
 
         <div *ngIf="question.options?.length" class="options-list">
           <div
             *ngFor="let option of question.options; let j = index"
             class="option"
-            [class.correct]="j === question.correctAnswer"
+            [class.correct]="isCorrectOption(i, j)"
           >
             <span class="option-letter">{{ getOptionLetter(j) }})</span>
             {{ limparLetra(option) }}

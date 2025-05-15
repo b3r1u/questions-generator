@@ -17,6 +17,7 @@ export class PdfUploadComponent {
   showDownloadOptions = false;
   pdfText: string = '';
   selectedFormat = 'pdf' as 'pdf' | 'docx' | 'xlsx';
+  showCorrectAnswers: boolean[] = [];
 
   generationOptions = {
     difficulty: 'medium' as 'easy' | 'medium' | 'hard',
@@ -72,6 +73,7 @@ export class PdfUploadComponent {
       .subscribe({
         next: (response) => {
           this.questions = response.questions;
+          this.showCorrectAnswers = this.questions.map(() => false);
           this.isLoading = false;
           this.showDownloadOptions = true;
         },
@@ -81,6 +83,17 @@ export class PdfUploadComponent {
           console.error(err);
         },
       });
+  }
+
+  toggleCorrectAnswer(index: number): void {
+    this.showCorrectAnswers[index] = !this.showCorrectAnswers[index];
+  }
+
+  isCorrectOption(index: number, optionIndex: number): boolean {
+    return (
+      this.showCorrectAnswers[index] &&
+      optionIndex === this.questions[index].correctAnswer
+    );
   }
 
   downloadPdf(): void {

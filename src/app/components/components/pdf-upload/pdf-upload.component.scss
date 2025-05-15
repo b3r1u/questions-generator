@@ -246,3 +246,21 @@ input[type="file"] {
   object-fit: contain;
   display: block;
 }
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+
+.toggle-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
