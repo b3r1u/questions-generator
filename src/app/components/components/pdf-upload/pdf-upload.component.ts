@@ -139,9 +139,9 @@ export class PdfUploadComponent {
       case 'easy':
         return 1;
       case 'medium':
-        return 2;
-      case 'hard':
         return 3;
+      case 'hard':
+        return 5;
       default:
         return 0;
     }

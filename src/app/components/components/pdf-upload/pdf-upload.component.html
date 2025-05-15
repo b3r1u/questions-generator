@@ -93,13 +93,18 @@
           <h4>
             Questão {{ i + 1 }}
             <span class="difficulty-stars">
-              <ng-container *ngFor="let star of getStarCount(question.difficulty || '') | numberToArray">
+              <ng-container
+                *ngFor="
+                  let star of getStarCount(question.difficulty || '')
+                    | numberToArray
+                "
+              >
                 <img src="assets/icons/star.png" class="star-icon" alt="★" />
               </ng-container>
             </span>
           </h4>
           <button class="edit-btn" (click)="editQuestion(question, i)">
-            <i class="edit-icon">✏️</i>
+            <img src="assets/icons/edit.png" alt="Editar" class="edit-icon" />
           </button>
         </div>
         <p class="question-text">{{ question.text }}</p>
